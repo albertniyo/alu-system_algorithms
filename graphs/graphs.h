@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 /**
@@ -69,6 +70,8 @@ typedef struct graph_s
 } graph_t;
 
 
+void graph_display(const graph_t *graph);
 graph_t *graph_create(void);
+vertex_t *graph_add_vertex(graph_t *graph, const char *str);
 
 #endif
