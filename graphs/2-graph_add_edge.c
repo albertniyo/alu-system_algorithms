@@ -31,26 +31,15 @@ static vertex_t *find_vertex(graph_t *graph, const char *str)
  */
 static int connect_edge(vertex_t *src, vertex_t *dest)
 {
-	edge_t *new_edge, *curr;
+	edge_t *new_edge;
 
 	new_edge = malloc(sizeof(edge_t));
 	if (!new_edge)
 		return (0);
 
 	new_edge->dest = dest;
-	new_edge->next = NULL;
-
-	if (!src->edges)
-	{
-		src->edges = new_edge;
-	}
-	else
-	{
-		curr = src->edges;
-		while (curr->next)
-			curr = curr->next;
-		curr->next = new_edge;
-	}
+	new_edge->next = src->edges;
+	src->edges = new_edge;
 
 	src->nb_edges++;
 	return (1);
@@ -85,7 +74,15 @@ int graph_add_edge(graph_t *graph, const char *src, const char *dest,
 	if (type == BIDIRECTIONAL)
 	{
 		if (!connect_edge(v_dest, v_src))
+		{
+			/* rollback the source edge on failure to prevent leaks */
+			edge_t *temp = v_src->edges;
+
+			v_src->edges = temp->next;
+			free(temp);
+			v_src->nb_edges--;
 			return (0);
+		}
 	}
 
 	return (1);
