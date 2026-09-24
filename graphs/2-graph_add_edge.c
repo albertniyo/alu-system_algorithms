@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include "graphs.h"
 
 /**
@@ -67,7 +69,6 @@ int graph_add_edge(graph_t *graph, const char *src, const char *dest,
 		   edge_type_t type)
 {
 	vertex_t *v_src, *v_dest;
-	edge_t *edge, *prev;
 
 	if (!graph || !src || !dest)
 		return (0);
@@ -81,22 +82,10 @@ int graph_add_edge(graph_t *graph, const char *src, const char *dest,
 	if (!connect_edge(v_src, v_dest))
 		return (0);
 
-	if (type == BIDIRECTIONAL && !connect_edge(v_dest, v_src))
+	if (type == BIDIRECTIONAL)
 	{
-		edge = v_src->edges;
-		prev = NULL;
-		while (edge->next)
-		{
-			prev = edge;
-			edge = edge->next;
-		}
-		if (!prev)
-			v_src->edges = NULL;
-		else
-			prev->next = NULL;
-		free(edge);
-		v_src->nb_edges--;
-		return (0);
+		if (!connect_edge(v_dest, v_src))
+			return (0);
 	}
 
 	return (1);
