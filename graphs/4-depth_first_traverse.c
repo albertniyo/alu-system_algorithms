@@ -6,15 +6,19 @@
  * @visited: array tracking already discovered vertex indices
  * @action: pointer to the callback func executed on the search
  * @depth: depth level of the current traversal call
+ *
+ * Return: max depth reached down this current path branch
  */
-static void dfs_explore(vertex_t *v, char *visited,
+static size_t dfs_explore(vertex_t *v, char *visited,
 			void (*action)(const vertex_t *v, size_t depth),
 			size_t depth)
 {
 	edge_t *edge;
+	size_t max_depth = depth;
+	size_t branch_depth;
 
 	if (!v || visited[v->index])
-		return;
+		return (0);
 
 	/* node as visited and hit the callback */
 	visited[v->index] = 1;
@@ -25,13 +29,19 @@ static void dfs_explore(vertex_t *v, char *visited,
 	while (edge)
 	{
 		if (edge->dest && !visited[edge->dest->index])
-			dfs_explore(edge->dest, visited, action, depth + 1);
+		{
+			branch_depth = dfs_explore(edge->dest, visited, action, depth + 1);
+			if (branch_depth > max_depth)
+				max_depth = branch_depth;
+		}
 		edge = edge->next;
 	}
+
+	return (max_depth);
 }
 
 /**
- * graph_traverse_dfs - traverses graph using DFS
+ * depth_first_traverse - traverses graph using DFS
  * @graph: pointer to the graph to traverse
  * @action: pointer to the func invoked when matching vertex
  *
@@ -42,6 +52,7 @@ size_t depth_first_traverse(const graph_t *graph,
 {
 	char *visited;
 	vertex_t *start_node;
+	size_t total_max_depth = 0;
 
 	if (!graph || !action || !graph->vertices)
 		return (0);
@@ -54,8 +65,8 @@ size_t depth_first_traverse(const graph_t *graph,
 	start_node = graph->vertices;
 
 	/* Begin DFS walk tracing depth steps from the head entry point */
-	dfs_explore(start_node, visited, action, 0);
+	total_max_depth = dfs_explore(start_node, visited, action, 0);
 
 	free(visited);
-	return (graph->nb_vertices - 1);
+	return (total_max_depth);
 }
