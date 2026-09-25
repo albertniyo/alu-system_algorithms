@@ -1,76 +1,85 @@
 #include "graphs.h"
 
 /**
- * bfs_explore - BFS traversal using an explicit queue
- * @graph: pointer to the graph
+ * run_bfs - iterates through the queue to perform the BFS
+ * @queue: array of vertex pointers acting as the queue
+ * @depths: array of depths matching the vertices in the queue
  * @visited: tracking array for visited node indices
  * @action: callback func to execute on vertex search
+ *
+ * Return: max vertex depth level reached
  */
-static void bfs_explore(const graph_t *graph, char *visited,
-			void (*action)(const vertex_t *v, size_t depth))
+static size_t run_bfs(vertex_t **queue, size_t *depths, char *visited,
+		      void (*action)(const vertex_t *v, size_t depth))
 {
-	vertex_t **queue;
-	size_t *depths;
-	size_t head = 0, tail = 0;
-	vertex_t *curr;
+	size_t head = 0, tail = 1, max_depth = 0, curr_depth;
+	vertex_t *curr_v;
 	edge_t *edge;
 
-	queue = malloc(graph->nb_vertices * sizeof(vertex_t *));
-	depths = malloc(graph->nb_vertices * sizeof(size_t));
-	if (!queue || !depths)
-	{
-		free(queue), free(depths);
-		return;
-	}
-	/* enqueue root node */
-	queue[tail] = graph->vertices;
-	depths[tail] = 0;
-	visited[graph->vertices->index] = 1;
-	tail++;
 	while (head < tail)
 	{
-		curr = queue[head];
-		action(curr, depths[head]);
-		edge = curr->edges;
+		curr_v = queue[head];
+		curr_depth = depths[head];
+		head++;
+
+		action(curr_v, curr_depth);
+		if (curr_depth > max_depth)
+			max_depth = curr_depth;
+
+		edge = curr_v->edges;
 		while (edge)
 		{
 			if (edge->dest && !visited[edge->dest->index])
 			{
 				visited[edge->dest->index] = 1;
 				queue[tail] = edge->dest;
-				depths[tail] = depths[head] + 1;
+				depths[tail] = curr_depth + 1;
 				tail++;
 			}
 			edge = edge->next;
 		}
-		head++;
 	}
-	free(queue);
-	free(depths);
+	return (max_depth);
 }
 
 /**
- * graph_traverse_bfs - traverses a graph using BFS
- * @graph: pointer to the graph to walk
- * @action: pointer to the func invoked when matching a vertex
+ * breadth_first_traverse - traverses a graph using the BFS algorithm
+ * @graph: pointer to the graph to traverse
+ * @action: pointer to the function to invoke for each visited vertex
  *
- * Return: max depth reached during search, or 0 on failure
+ * Return: max vertex depth level reached, or 0 on failure
  */
 size_t breadth_first_traverse(const graph_t *graph,
-			  void (*action)(const vertex_t *v, size_t depth))
-
+			      void (*action)(const vertex_t *v, size_t depth))
 {
 	char *visited;
+	vertex_t **queue;
+	size_t *depths, max_depth;
 
 	if (!graph || !action || !graph->vertices)
 		return (0);
 
 	visited = calloc(graph->nb_vertices, sizeof(char));
-	if (!visited)
-		return (0);
+	queue = malloc(graph->nb_vertices * sizeof(vertex_t *));
+	depths = malloc(graph->nb_vertices * sizeof(size_t));
 
-	bfs_explore(graph, visited, action);
+	if (!visited || !queue || !depths)
+	{
+		free(visited);
+		free(queue);
+		free(depths);
+		return (0);
+	}
+
+	queue[0] = graph->vertices;
+	depths[0] = 0;
+	visited[graph->vertices->index] = 1;
+
+	max_depth = run_bfs(queue, depths, visited, action);
 
 	free(visited);
-	return (graph->nb_vertices - 1);
+	free(queue);
+	free(depths);
+
+	return (max_depth);
 }
