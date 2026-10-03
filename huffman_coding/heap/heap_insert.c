@@ -4,6 +4,8 @@
  * shift_up - restores min-heap property by bubbling up the node
  * @heap: pointer to heap
  * @node: pointer to newly inserted node
+ *
+ * Return: pointer to the node's final position containing the data
  */
 binary_tree_node_t *shift_up(heap_t *heap, binary_tree_node_t *node)
 {
@@ -20,6 +22,33 @@ binary_tree_node_t *shift_up(heap_t *heap, binary_tree_node_t *node)
 }
 
 /**
+ * get_parent - navigates the binary tree to find the target parent node
+ * @root: pointer to root node of the heap
+ * @target_size: size index of the node to insert
+ *
+ * Return: pointer to the target parent node
+ */
+binary_tree_node_t *get_parent(binary_tree_node_t *root, size_t target_size)
+{
+	size_t mask;
+
+	mask = 1;
+	while (mask <= target_size)
+		mask <<= 1;
+	mask >>= 2;
+
+	while (mask > 1)
+	{
+		if (target_size & mask)
+			root = root->right;
+		else
+			root = root->left;
+		mask >>= 1;
+	}
+	return (root);
+}
+
+/**
  * heap_insert - inserts a value in a Min Binary Heap
  * @heap: pointer to heap which has to be inserted
  * @data: pointer containing the data to store in the new node
@@ -29,7 +58,7 @@ binary_tree_node_t *shift_up(heap_t *heap, binary_tree_node_t *node)
 binary_tree_node_t *heap_insert(heap_t *heap, void *data)
 {
 	binary_tree_node_t *node, *parent;
-	size_t target_size, mask;
+	size_t target_size;
 
 	if (!heap || !data)
 		return (NULL);
@@ -45,20 +74,7 @@ binary_tree_node_t *heap_insert(heap_t *heap, void *data)
 	}
 
 	target_size = heap->size + 1;
-	mask = 1;
-	while (mask <= target_size)
-		mask <<= 1;
-	mask >>= 2;
-
-	parent = heap->root;
-	while (mask > 1)
-	{
-		if (target_size & mask)
-			parent = parent->right;
-		else
-			parent = parent->left;
-		mask >>= 1;
-	}
+	parent = get_parent(heap->root, target_size);
 
 	node = binary_tree_node(parent, data);
 	if (!node)
