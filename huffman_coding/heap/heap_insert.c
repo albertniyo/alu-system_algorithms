@@ -5,7 +5,7 @@
  * @heap: pointer to heap
  * @node: pointer to newly inserted node
  */
-void shift_up(heap_t *heap, binary_tree_node_t *node)
+binary_tree_node_t *shift_up(heap_t *heap, binary_tree_node_t *node)
 {
 	void *temp;
 
@@ -16,6 +16,7 @@ void shift_up(heap_t *heap, binary_tree_node_t *node)
 		node->parent->data = temp;
 		node = node->parent;
 	}
+	return (node);
 }
 
 /**
@@ -69,7 +70,5 @@ binary_tree_node_t *heap_insert(heap_t *heap, void *data)
 		parent->left = node;
 
 	heap->size++;
-	shift_up(heap, node);
-
-	return (node);
+	return (shift_up(heap, node));
 }
