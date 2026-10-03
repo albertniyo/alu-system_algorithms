@@ -1,2 +1,2 @@
-# Huffman Coding
-This directory contains Projects implementation of C - Huffman coding intranet activity.
+# Heap
+This directory contains Heap Projects implementation of C - Huffman coding intranet activity.
