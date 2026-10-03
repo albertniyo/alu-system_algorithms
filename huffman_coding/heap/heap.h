@@ -19,7 +19,7 @@ typedef struct binary_tree_node_s
 	struct binary_tree_node_s *left;
 	struct binary_tree_node_s *right;
 	struct binary_tree_node_s *parent;
-} bts;
+} binary_tree_node_t;
 
 /**
  * struct heap_s - heap data structure
@@ -32,11 +32,11 @@ typedef struct heap_s
 {
 	size_t size;
 	int (*data_cmp)(void *, void *);
-	bts *root;
+	binary_tree_node_t *root;
 } heap_t;
 
 heap_t *heap_create(int (*data_cmp)(void *, void *));
-bts *binary_tree_node(bts *parent, void *data);
-bts *heap_insert(heap_t *heap, void *data);
+binary_tree_node_t *binary_tree_node(binary_tree_node_t *parent, void *data);
+binary_tree_node_t *heap_insert(heap_t *heap, void *data);
 
 #endif

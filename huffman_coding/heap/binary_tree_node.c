@@ -7,9 +7,9 @@
  *
  * Return: pointer to the created node or NULL if it fails
  */
-bts *binary_tree_node(bts *parent, void *data)
+binary_tree_node_t *binary_tree_node(binary_tree_node_t *parent, void *data)
 {
-	bts *node;
+	binary_tree_node_t *node;
 
 	node = malloc(sizeof(*node));
 	if (!node)
