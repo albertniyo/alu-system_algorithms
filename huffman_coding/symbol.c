@@ -2,48 +2,36 @@
 #include "huffman.h"
 
 /**
- * huffman_data_cmp - compares the frequency metrics of two Huffman tree nodes
- * @p1: pointer to first generic binary tree node
- * @p2: pointer to second generic binary tree node
+ * symbol_create - generic tree node containing a Huffman node
+ * @data: char to be stored in the inner node structure
+ * @freq: freq value associated with the character node
  *
- * Return: difference between the frequency counts (p1 - p2)
+ * Return: pointer to the newly allocated structural tree node,
+ *         or NULL on failure.
  */
-int huffman_data_cmp(void *p1, void *p2)
+binary_tree_node_t *symbol_create(char data, size_t freq)
 {
-	binary_tree_node_t *node1;
-	binary_tree_node_t *node2;
-	huffman_node_t *huff1;
-	huffman_node_t *huff2;
+	binary_tree_node_t *tree_node;
+	huffman_node_t *huff_payload;
 
-	if (p1 == NULL || p2 == NULL)
-		return (0);
+	tree_node = malloc(sizeof(binary_tree_node_t));
+	if (tree_node == NULL)
+		return (NULL);
 
-	node1 = (binary_tree_node_t *)p1;
-	node2 = (binary_tree_node_t *)p2;
-
-	huff1 = (huffman_node_t *)node1->data;
-	huff2 = (huffman_node_t *)node2->data;
-
-	return (huff1->freq - huff2->freq);
-}
-
-/**
- * free_huffman_node - custom destructor function to free a nested Huffman node
- * @p: pointer to the generic binary tree node to be completely cleared
- */
-void free_huffman_node(void *p)
-{
-	binary_tree_node_t *node;
-
-	if (p == NULL)
-		return;
-
-	node = (binary_tree_node_t *)p;
-
-	if (node->data != NULL)
+	huff_payload = malloc(sizeof(huffman_node_t));
+	if (huff_payload == NULL)
 	{
-		free(node->data);
+		free(tree_node);
+		return (NULL);
 	}
 
-	free(node);
+	huff_payload->data = data;
+	huff_payload->freq = freq;
+
+	tree_node->data = huff_payload;
+	tree_node->left = NULL;
+	tree_node->right = NULL;
+	tree_node->parent = NULL;
+
+	return (tree_node);
 }

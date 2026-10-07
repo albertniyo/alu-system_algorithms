@@ -27,6 +27,7 @@ typedef struct huffman_node_s
 	size_t freq;
 } huffman_node_t;
 
+binary_tree_node_t *symbol_create(char data, size_t freq);
 binary_tree_node_t *huffman_node_create(char data, size_t freq);
 
 
