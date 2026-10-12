@@ -50,10 +50,7 @@ static int p_queue_cmp(void *p1, void *p2)
 	if (h1 != h2)
 		return (h1 - h2);
 
-	if (symbol1->data != symbol2->data)
-		return ((int)(symbol1->data - symbol2->data));
-
-	return (0);
+	return ((int)(symbol1->id - symbol2->id));
 }
 
 /**

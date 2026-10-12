@@ -11,15 +11,15 @@
 symbol_t *symbol_create(char data, size_t freq)
 {
 	symbol_t *symbol;
+	static size_t global_id = 0;
 
-	/* Allocate memory for the symbol structure directly */
 	symbol = malloc(sizeof(symbol_t));
 	if (symbol == NULL)
 		return (NULL);
 
-	/* Assign internal metrics */
 	symbol->data = data;
 	symbol->freq = freq;
+	symbol->id = global_id++;
 
 	return (symbol);
 }
