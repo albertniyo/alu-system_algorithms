@@ -2,6 +2,25 @@
 #include "huffman.h"
 
 /**
+ * get_height - calculates height of a nested btree node
+ * @node: pointer to nested tree node
+ *
+ * Return: height of node or 0 if NULL
+ */
+static int get_height(binary_tree_node_t *node)
+{
+	int left_h, right_h;
+
+	if (node == NULL)
+		return (0);
+
+	left_h = get_height(node->left);
+	right_h = get_height(node->right);
+
+	return ((left_h > right_h ? left_h : right_h) + 1);
+}
+
+/**
  * p_queue_cmp - comparison function for the priority queue items
  * @p1: pointer to the first generic element (a binary tree node wrapper)
  * @p2: pointer to the second generic element (a binary tree node wrapper)
@@ -10,10 +29,9 @@
  */
 static int p_queue_cmp(void *p1, void *p2)
 {
-	binary_tree_node_t *nested1;
-	binary_tree_node_t *nested2;
-	symbol_t *symbol1;
-	symbol_t *symbol2;
+	binary_tree_node_t *nested1, *nested2;
+	symbol_t *symbol1, *symbol2;
+	int h1, h2;
 
 	if (p1 == NULL || p2 == NULL)
 		return (0);
@@ -24,13 +42,24 @@ static int p_queue_cmp(void *p1, void *p2)
 	symbol1 = (symbol_t *)nested1->data;
 	symbol2 = (symbol_t *)nested2->data;
 
-	return ((int)(symbol1->freq - symbol2->freq));
+	if (symbol1->freq != symbol2->freq)
+		return ((int)(symbol1->freq - symbol2->freq));
+
+	h1 = get_height(nested1);
+	h2 = get_height(nested2);
+	if (h1 != h2)
+		return (h1 - h2);
+
+	if (symbol1->data != symbol2->data)
+		return ((int)(symbol1->data - symbol2->data));
+
+	return (0);
 }
 
 /**
  * huffman_priority_queue - priority queue for Huffman coding
  * @data: array of characters of size @size
- * @freq: rray containing the associated frequencies of size @size
+ * @freq: array containing the associated frequencies of size @size
  * @size: size of the input arrays
  *
  * Return: pointer to the created min heap (priority queue),
