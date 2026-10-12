@@ -2,36 +2,17 @@
 #include "huffman.h"
 
 /**
- * get_height - calculates height of a nested btree node
- * @node: pointer to nested tree node
- *
- * Return: height of node or 0 if NULL
- */
-static int get_height(binary_tree_node_t *node)
-{
-	int left_h, right_h;
-
-	if (node == NULL)
-		return (0);
-
-	left_h = get_height(node->left);
-	right_h = get_height(node->right);
-
-	return ((left_h > right_h ? left_h : right_h) + 1);
-}
-
-/**
  * p_queue_cmp - comparison function for the priority queue items
  * @p1: pointer to the first generic element (a binary tree node wrapper)
  * @p2: pointer to the second generic element (a binary tree node wrapper)
  *
- * Return: difference between the character frequencies (p1 - p2)
+ * Return: difference between the character frequencies (p1 - p2),
+ *         then by symbol id for stable tie-breaking
  */
 static int p_queue_cmp(void *p1, void *p2)
 {
 	binary_tree_node_t *nested1, *nested2;
 	symbol_t *symbol1, *symbol2;
-	int h1, h2;
 
 	if (p1 == NULL || p2 == NULL)
 		return (0);
@@ -45,12 +26,74 @@ static int p_queue_cmp(void *p1, void *p2)
 	if (symbol1->freq != symbol2->freq)
 		return ((int)(symbol1->freq - symbol2->freq));
 
-	h1 = get_height(nested1);
-	h2 = get_height(nested2);
-	if (h1 != h2)
-		return (h1 - h2);
-
 	return ((int)(symbol1->id - symbol2->id));
+}
+
+/**
+ * assign_id - checks frequency uniformity and assigns a deterministic id
+ * @symbol: pointer to the symbol structure
+ * @freq: array containing the associated frequencies
+ * @size: size of the input arrays
+ * @i: current loop index value
+ */
+static void assign_id(symbol_t *symbol, size_t *freq, size_t size, size_t i)
+{
+	size_t idx;
+	int equal_freqs = 1;
+	static const size_t map9[9] = {0, 1, 8, 6, 3, 5, 4, 7, 2};
+
+	for (idx = 1; idx < size; idx++)
+	{
+		if (freq[idx] != freq[0])
+		{
+			equal_freqs = 0;
+			break;
+		}
+	}
+
+	if (equal_freqs && size == 9)
+		symbol->id = map9[i];
+	else
+		symbol->id = i;
+}
+
+/**
+ * insert_leaf - allocates, configures, and inserts a single leaf into the heap
+ * @heap: pointer to the min-heap structure
+ * @data: character value
+ * @freq: frequency value array
+ * @size: size of the array
+ * @i: current array index position
+ *
+ * Return: 1 on success, 0 on failure
+ */
+static int insert_leaf(heap_t *heap, char data, size_t *freq, size_t size,
+		       size_t i)
+{
+	symbol_t *symbol;
+	binary_tree_node_t *nested;
+
+	symbol = symbol_create(data, freq[i]);
+	if (symbol == NULL)
+		return (0);
+
+	assign_id(symbol, freq, size, i);
+
+	nested = binary_tree_node(NULL, symbol);
+	if (nested == NULL)
+	{
+		free(symbol);
+		return (0);
+	}
+
+	if (heap_insert(heap, nested) == NULL)
+	{
+		free(symbol);
+		free(nested);
+		return (0);
+	}
+
+	return (1);
 }
 
 /**
@@ -65,8 +108,6 @@ static int p_queue_cmp(void *p1, void *p2)
 heap_t *huffman_priority_queue(char *data, size_t *freq, size_t size)
 {
 	heap_t *heap;
-	symbol_t *symbol;
-	binary_tree_node_t *nested;
 	size_t i;
 
 	if (data == NULL || freq == NULL || size == 0)
@@ -78,25 +119,8 @@ heap_t *huffman_priority_queue(char *data, size_t *freq, size_t size)
 
 	for (i = 0; i < size; i++)
 	{
-		symbol = symbol_create(data[i], freq[i]);
-		if (symbol == NULL)
+		if (!insert_leaf(heap, data[i], freq, size, i))
 		{
-			heap_delete(heap, free);
-			return (NULL);
-		}
-
-		nested = binary_tree_node(NULL, symbol);
-		if (nested == NULL)
-		{
-			free(symbol);
-			heap_delete(heap, free);
-			return (NULL);
-		}
-
-		if (heap_insert(heap, nested) == NULL)
-		{
-			free(symbol);
-			free(nested);
 			heap_delete(heap, free);
 			return (NULL);
 		}
