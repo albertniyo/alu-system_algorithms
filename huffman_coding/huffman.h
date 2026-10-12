@@ -8,11 +8,13 @@
  *
  * @data: character
  * @freq: associated frequency
+ * @id: unique auto-incremented insertion Id for sorting
  */
 typedef struct symbol_s
 {
 	char data;
 	size_t freq;
+	size_t id;
 } symbol_t;
 
 /**
