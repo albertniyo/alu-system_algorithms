@@ -29,7 +29,7 @@ int backtrack_g(vertex_t const *curr, vertex_t const *target,
 			return (0);
 	}
 
-	printf("checking %s\n", curr->content);
+	printf("Checking %s\n", curr->content);
 	visited[(*visit_count)++] = curr->content;
 
 	if (strcmp(curr->content, target->content) == 0)
